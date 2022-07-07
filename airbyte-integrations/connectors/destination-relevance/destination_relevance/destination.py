@@ -44,6 +44,7 @@ class DestinationRelevance(Destination):
                     json={"documents":[data]},
                     headers={"authorization":config['authorizationHeader']}
                 )
+                if (res.status_code != 200): raise Exception(f"Failed to write record to destination: {res.text}")
             else:
                 # ignore other message types for now
                 continue
