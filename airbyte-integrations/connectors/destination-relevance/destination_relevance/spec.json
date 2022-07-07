@@ -1,0 +1,24 @@
+{
+  "documentationUrl": "https://docs.airbyte.io/integrations/destinations/relevance",
+  "supported_destination_sync_modes": [
+    "append_dedup"
+  ],
+  "supportsIncremental": true,
+  "supportsDBT": false,
+  "supportsNormalization": false,
+  "connectionSpecification": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Destination Relevance",
+    "type": "object",
+    "required": ["authorizationHeader","endpoint"],
+    "additionalProperties": false,
+    "properties": {
+      "authorizationHeader": {
+        "type": "string"
+      },
+      "endpoint":{
+        "type": "string"
+      }
+    }
+  }
+}
