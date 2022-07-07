@@ -1,1 +1,1 @@
-{"type":"RECORD","record":{"stream":"pokemon","data":{"_id":"132","@metadata":{"dataset":"airbytetest"},"airbyte_vector_":[1,2,3]},"emitted_at":1650266508774}}
+{"type":"RECORD","record":{"stream":"pokemon","data":{"_id":"jkljkl","airbyte_vector_":[1,2,3],"newfield":"aaa"},"emitted_at":1650266508774}}

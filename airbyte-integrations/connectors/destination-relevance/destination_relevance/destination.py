@@ -39,10 +39,8 @@ class DestinationRelevance(Destination):
                 yield message
             elif message.type == Type.RECORD:
                 data = message.record.data
-                metadata = data['@metadata']
-                del data['@metadata']
                 res = requests.post(
-                    f"{config['endpoint']}/latest/datasets/{metadata['dataset']}/documents/bulk_insert",
+                    f"{config['endpoint']}/latest/datasets/{config['dataset']}/documents/bulk_insert",
                     json={"documents":[data]},
                     headers={"authorization":config['authorizationHeader']}
                 )
