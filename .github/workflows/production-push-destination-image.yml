@@ -1,0 +1,42 @@
+on:
+  push:
+    tags:
+    - '*'
+
+name: vecdb-ingest-node image to ECR
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Build, tag, and push the image to Amazon ECR
+      id: build-image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: ${{ secrets.AWS_ECR_REPO }}
+        IMAGE_TAG: prod-${{ github.sha }}
+      run: |
+        echo "Building docker image"
+        cd airbyte-integrations/connectors/destination-relevance
+        docker build -t destination-relevance .
+        docker image tag destination-relevance $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        docker image tag destination-relevance $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        echo "Pushing docker image to ECR"
+        docker image push --all-tags $ECR_REGISTRY/$ECR_REPOSITORY
+        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
