@@ -3,7 +3,7 @@ on:
     tags:
     - '*'
 
-name: vecdb-ingest-node image to ECR
+name: destination-relevance image to ECR
 
 jobs:
   deploy:
