@@ -17,6 +17,7 @@ class DestinationRelevance(Destination):
     def write(
         self, config: Mapping[str, Any], configured_catalog: ConfiguredAirbyteCatalog, input_messages: Iterable[AirbyteMessage]
     ) -> Iterable[AirbyteMessage]:
+        
         """
         TODO
         Reads the input stream of messages, config, and catalog to write data to the destination.
@@ -32,6 +33,11 @@ class DestinationRelevance(Destination):
         :param input_messages: The stream of input messages received from the source
         :return: Iterable of AirbyteStateMessages wrapped in AirbyteMessage structs
         """
+        id_field = None
+        try:
+            id_field = configured_catalog.streams[0].primary_key[0][0]
+        except Exception as e:
+            print(f'Primary key not defined in catalog {e}')
         for message in input_messages:
             if message.type == Type.STATE:
                 # Emitting a state message indicates that all records which came before it have been written to the destination. So we flush
@@ -39,6 +45,7 @@ class DestinationRelevance(Destination):
                 yield message
             elif message.type == Type.RECORD:
                 data = message.record.data
+                if id_field: data['_id'] = data[id_field]
                 res = requests.post(
                     f"{config['endpoint']}/latest/datasets/{config['dataset']}/documents/bulk_insert",
                     json={"documents":[data]},
