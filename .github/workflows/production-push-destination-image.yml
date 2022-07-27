@@ -34,7 +34,7 @@ jobs:
         docker build -t destination-relevance .
         docker image tag destination-relevance $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         docker image tag destination-relevance $ECR_REGISTRY/$ECR_REPOSITORY:latest
-        docker image tag destination-relevance $ECR_REGISTRY/$ECR_REPOSITORY:1.0.0
+        docker image tag destination-relevance $ECR_REGISTRY/$ECR_REPOSITORY:0.0.0
         echo "Pushing docker image to ECR"
         docker image push --all-tags $ECR_REGISTRY/$ECR_REPOSITORY
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
