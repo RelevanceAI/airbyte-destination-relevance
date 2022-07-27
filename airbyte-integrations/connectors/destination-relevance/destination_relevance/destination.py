@@ -38,6 +38,16 @@ class DestinationRelevance(Destination):
             id_field = configured_catalog.streams[0].primary_key[0][0]
         except Exception as e:
             print(f'Primary key not defined in catalog {e}')
+        state = {"batched_documents":[]}
+        def ingest_batch():
+            res = requests.post(
+                f"{config['endpoint']}/latest/datasets/{config['dataset']}/documents/bulk_insert",
+                json={"documents":state["batched_documents"],"ingest_in_background":True},
+                headers={"authorization":config['authorizationHeader']}
+            )
+            print(f"Bulk Inserting {len(state['batched_documents'])} documents with ingest_in_background")
+            state["batched_documents"] = []
+            if (res.status_code != 200): raise Exception(f"Failed to write record to destination: {res.text}")
         for message in input_messages:
             if message.type == Type.STATE:
                 # Emitting a state message indicates that all records which came before it have been written to the destination. So we flush
@@ -46,18 +56,14 @@ class DestinationRelevance(Destination):
             elif message.type == Type.RECORD:
                 data = message.record.data
                 if id_field: data['_id'] = data[id_field]
-                res = requests.post(
-                    f"{config['endpoint']}/latest/datasets/{config['dataset']}/documents/bulk_insert",
-                    json={"documents":[data]},
-                    headers={"authorization":config['authorizationHeader']}
-                )
-                if (res.status_code != 200): raise Exception(f"Failed to write record to destination: {res.text}")
+                state["batched_documents"].append(data)
+                if len(state["batched_documents"]) < 1000: continue
+                ingest_batch()
             else:
                 # ignore other message types for now
                 continue
-
-
-        pass
+        if len(state["batched_documents"]) > 0:
+            ingest_batch()
 
     def check(self, logger: AirbyteLogger, config: Mapping[str, Any]) -> AirbyteConnectionStatus:
         """
